@@ -1,0 +1,23 @@
+{
+  "name": "linkedinroaster",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.16.0",
+    "axios": "^1.7.3",
+    "cheerio": "^1.0.0-rc.12",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "linkedin-profile-scraper": "^2.3.1",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.4"
+  }
+}
