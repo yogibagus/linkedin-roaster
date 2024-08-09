@@ -4,6 +4,9 @@
 # Build
 /build
 
-#utils
+# env
+.env
+
+# utils
 package-lock.json
 parsedData.json

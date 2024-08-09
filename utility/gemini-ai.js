@@ -1,7 +1,7 @@
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
 // Google Generative AI setup
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY); // Access API key as environment variable
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Access API key as environment variable
 
 // Safety settings for the generative model
 const safetySetting = [
