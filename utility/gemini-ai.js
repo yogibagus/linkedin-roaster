@@ -65,8 +65,9 @@ async function generateRoast(profileInfo, lang, platform) {
             return "Language is not valid";
         }
 
+        platform = "linkedin";
         // check platform in array arrPlatform
-        if (!isValidPlatform("linkedin")) {
+        if (!isValidPlatform(platform)) {
             return "Platform is not valid";
         }
 
