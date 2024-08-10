@@ -2,6 +2,7 @@ const express = require('express');
 const { limiter } = require('./middleware');
 const { getProfileLinkedIn } = require('./utility/scraper');
 const { generateRoast } = require('./utility/gemini-ai');
+const requestIp = require('request-ip');
 var cors = require('cors')
 require('dotenv').config()
 
@@ -10,7 +11,7 @@ const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.json());
-
+app.use(requestIp.mw())
 app.use(cors())
 
 app.get('/', (req, res) => {
