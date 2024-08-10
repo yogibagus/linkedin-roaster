@@ -56,10 +56,9 @@ async function generateText(prompt) {
 
 // Function to generate a roast based on the profile information
 async function generateRoast(profileInfo, lang, platform) {
-    console.log('Generating roast with language:', lang);
+    console.log('Generating text roast ...');
     try {
         // Construct the prompt for the generative model
-    
         // check lang in array arrLanguage
         if (!isValidLanguage(lang)) {
             return "Language is not valid";
@@ -79,6 +78,8 @@ async function generateRoast(profileInfo, lang, platform) {
         console.log("Lang:", lang);
 
         result = await generateText(prompt);
+        
+        console.log("Roasting result:", result)
         return result;
     } catch (error) {
         console.error('Error generating roast:', error);
