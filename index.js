@@ -5,6 +5,9 @@ const { generateRoast } = require('./utility/gemini-ai');
 var cors = require('cors')
 require('dotenv').config()
 
+// add port
+const port = 3000
+
 const app = express();
 app.use(express.json());
 
@@ -39,6 +42,6 @@ app.post('/api/roast/linkedin', limiter, async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log('Server is running on http://localhost:3000');
+app.listen(port, () => {
+  console.log(`Starting app listening on port ${port}`);
 });

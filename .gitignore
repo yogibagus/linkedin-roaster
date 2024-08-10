@@ -10,3 +10,4 @@
 # utils
 package-lock.json
 parsedData.json
+.vercel
