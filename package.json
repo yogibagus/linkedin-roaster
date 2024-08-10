@@ -9,6 +9,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
+  "engines": {
+    "node": "20.x"
+  },
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.16.0",
