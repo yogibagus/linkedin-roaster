@@ -21,6 +21,11 @@ app.get('/', (req, res) => {
 app.post('/api/roast/linkedin', limiter, async (req, res) => {
   console.log("Starting scraping...");
   const { username } = req.body;
+  const { lang } = req.body;
+
+  if (!lang) {
+    return res.status(400).json({ error: 'Language is required' });
+  }
 
   if (!username) {
     return res.status(400).json({ error: 'Profile URL is required' });
@@ -34,7 +39,7 @@ app.post('/api/roast/linkedin', limiter, async (req, res) => {
       return res.status(404).json({ error: 'Profile information not found or please try again later' });
     }
 
-    const response = await generateRoast(data);
+    const response = await generateRoast(data, lang);
     res.json({ response });
   } catch (error) {
     console.error('Error during scraping:', error);

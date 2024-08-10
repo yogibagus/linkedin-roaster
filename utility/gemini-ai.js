@@ -25,11 +25,11 @@ var arrPlatform = [
 
 // array language
 var arrLanguage = [
-    "Indonesian slang (bahasa gaul)",
-    "English",
-    "Javanese",
-    "Sundanese",
-    "Balinese"
+    "indonesian",
+    "english",
+    "javanese",
+    "sundanese",
+    "balinese"
 ];
 
 // function to check if the platform is valid from the array
@@ -55,17 +55,27 @@ async function generateText(prompt) {
 }
 
 // Function to generate a roast based on the profile information
-async function generateRoast(profileInfo, platform, lang) {
-    console.log('Generating roast...');
+async function generateRoast(profileInfo, lang, platform) {
+    console.log('Generating roast with language:', lang);
     try {
         // Construct the prompt for the generative model
-        lang = isValidPlatform(lang) ? lang : 'Indonesian slang (bahasa gaul)';
-        platform = isValidLanguage(platform) ? platform : 'linkedin';
+    
+        // check lang in array arrLanguage
+        if (!isValidLanguage(lang)) {
+            return "Language is not valid";
+        }
+
+        // check platform in array arrPlatform
+        if (!isValidPlatform("linkedin")) {
+            return "Platform is not valid";
+        }
+
         const prompt = `Roasting this ${platform} profile in ${lang} within 100 words with this data: ${JSON.stringify(
             profileInfo
-        )}`;
+        )} and use slang according to language`;
 
         console.log('Prompt:', prompt);
+        console.log("Lang:", lang);
 
         result = await generateText(prompt);
         return result;
