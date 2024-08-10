@@ -19,13 +19,13 @@ Note: this app using li_at cookie session, you have to creaate linkedin account 
 Clone the project
 
 ```bash
-  git clone https://link-to-project
+  git clone https://github.com/yogibagus/linkedin-roaster
 ```
 
 Go to the project directory
 
 ```bash
-  cd my-project
+  cd linkedin-roaster
 ```
 
 Install dependencies
@@ -53,7 +53,7 @@ Start the server
 #### Roast Linked Profile
 
 ```http
-  POST /roast/linkedin
+  POST /api/roast/linkedin
 ```
 Use json request body
 

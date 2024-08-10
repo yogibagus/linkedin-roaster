@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 });
 
 // LinkedIn profile scraping endpoint
-app.post('/roast/linkedin', limiter, async (req, res) => {
+app.post('/api/roast/linkedin', limiter, async (req, res) => {
   console.log("Starting scraping...");
   const { username } = req.body;
 
