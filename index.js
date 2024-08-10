@@ -37,7 +37,7 @@ app.post('/api/roast/linkedin', limiter, async (req, res) => {
   try {
     const data = await getProfileLinkedIn(profileUrl);      
     if (!data) {
-      return res.status(404).json({ error: 'Profile information not found or please try again later' });
+      return res.status(404).json({ error: 'We’re currently experiencing high traffic on our servers. This might be causing the profile not to be found or accessed. Please try again later. Thank you for your patience!' });
     }
 
     const response = await generateRoast(data, lang);
