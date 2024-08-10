@@ -6,6 +6,11 @@ require('dotenv').config()
 // LinkedIn li_at cookie - replace with your actual value (required for scraping)
 const liAtCookie = process.env.LI_AT_COOKIE;
 
+// username splitter
+function extractUsername(profileUrl) {
+    return profileUrl.split("/").pop();
+}
+
 // utility.js
 // Function to fetch LinkedIn profile data
 async function getProfileLinkedIn(profileUrl) {
@@ -42,7 +47,7 @@ async function getProfileLinkedIn(profileUrl) {
         });
 
         // Extract the relevant profile information
-        const extractedData = extractorData(jsonData);
+        const extractedData = extractorData(jsonData, extractUsername(profileUrl));
         return extractedData;
     } catch (error) {
         console.error('Error fetching/parsing LinkedIn data:', error);
@@ -52,17 +57,15 @@ async function getProfileLinkedIn(profileUrl) {
 
 // Function to extract relevant profile information
 // you can check the raw data structure in the parsedData.json file
-function extractorData(jsonData) {
+function extractorData(jsonData, username) {
     let profileInfo = {};
     if (jsonData.included) {
         for (const item of jsonData.included) {
             if (item.defaultLocalizedNameWithoutCountryName != undefined) {
                 var name = item.defaultLocalizedNameWithoutCountryName
             }
-            // Check for the entity type "com.linkedin.voyager.dash.identity.profile.Profile"
-            if (item.$type === 'com.linkedin.voyager.dash.identity.profile.Profile') {
+            if (item.publicIdentifier == username) {
                 profileInfo.publicIdentifier = item.publicIdentifier || null;
-                profileInfo.multiLocaleHeadline = item.multiLocaleHeadline || [];
                 profileInfo.headline = item.headline || null;
                 profileInfo.defaultLocalizedNameWithoutCountryName = name || null;
             }

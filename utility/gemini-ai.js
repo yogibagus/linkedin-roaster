@@ -63,7 +63,7 @@ async function generateRoast(profileInfo, platform, lang) {
         platform = isValidLanguage(platform) ? platform : 'linkedin';
         const prompt = `Roasting this ${platform} profile in ${lang} within 100 words with this data: ${JSON.stringify(
             profileInfo
-        )}. Don't forget to mention the profile name.`;
+        )}`;
 
         console.log('Prompt:', prompt);
 
