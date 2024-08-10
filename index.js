@@ -8,11 +8,14 @@ require('dotenv').config()
 
 // add port
 const port = process.env.PORT || 3000;
+const appUrl = process.env.APP_URL
 
 const app = express();
 app.use(express.json());
 app.use(requestIp.mw())
-app.use(cors())
+app.use(cors({
+  origin: [`http://localhost:${port}`, appUrl]
+}))
 
 app.get('/', (req, res) => {
   res.send('Welcome to Roast API!');
