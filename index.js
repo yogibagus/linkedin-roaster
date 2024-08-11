@@ -40,7 +40,8 @@ app.post('/api/roast/linkedin', limiter, async (req, res) => {
       return res.status(404).json({ error: 'We’re currently experiencing high traffic on our servers. This might be causing the profile not to be found or accessed. Please try again later. Thank you for your patience!' });
     }
 
-    const response = await generateRoast(data, lang);
+    const response = await generateRoast(req, data, lang, 'linkedin');
+
     res.json({ response });
   } catch (error) {
     console.error('Error during scraping:', error);

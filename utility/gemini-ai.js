@@ -1,4 +1,6 @@
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
+const { createLog } = require('./loging');
+const { parseUserAgent } = require('./utils');
 
 // Google Generative AI setup
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Access API key as environment variable
@@ -55,7 +57,7 @@ async function generateText(prompt) {
 }
 
 // Function to generate a roast based on the profile information
-async function generateRoast(profileInfo, lang, platform) {
+async function generateRoast(req, profileInfo, lang, platform) {
     console.log('Generating text roast ...');
     try {
         // Construct the prompt for the generative model
@@ -64,7 +66,6 @@ async function generateRoast(profileInfo, lang, platform) {
             return "Language is not valid";
         }
 
-        platform = "linkedin";
         // check platform in array arrPlatform
         if (!isValidPlatform(platform)) {
             return "Platform is not valid";
@@ -78,6 +79,9 @@ async function generateRoast(profileInfo, lang, platform) {
         console.log("Lang:", lang);
 
         result = await generateText(prompt);
+
+        // Log the generated roast
+        await createLog(profileInfo.publicIdentifier, parseUserAgent(req.headers['user-agent']), profileInfo, prompt, lang, platform, result, req.clientIp);
         
         console.log("Roasting result:", result)
         return result;
