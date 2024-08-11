@@ -1,5 +1,5 @@
 const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
-const { createLog } = require('./loging');
+const { createLog } = require('./logging');
 const { parseUserAgent } = require('./utils');
 
 // Google Generative AI setup

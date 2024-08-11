@@ -3,6 +3,7 @@ const { limiter } = require('./middleware');
 const { getProfileLinkedIn } = require('./utility/scraper');
 const { generateRoast } = require('./utility/gemini-ai');
 const requestIp = require('request-ip');
+const { getLogs, getLogCount } = require('./utility/logging');
 var cors = require('cors')
 require('dotenv').config()
 
@@ -35,7 +36,7 @@ app.post('/api/roast/linkedin', limiter, async (req, res) => {
   const profileUrl = "https://www.linkedin.com/in/" + username;
 
   try {
-    const data = await getProfileLinkedIn(profileUrl);      
+    const data = await getProfileLinkedIn(profileUrl);
     if (!data) {
       return res.status(404).json({ error: 'We’re currently experiencing high traffic on our servers. This might be causing the profile not to be found or accessed. Please try again later. Thank you for your patience!' });
     }
@@ -47,6 +48,39 @@ app.post('/api/roast/linkedin', limiter, async (req, res) => {
     console.error('Error during scraping:', error);
     res.status(500).json({ error: 'Failed to process request' });
   }
+});
+
+// Api get 5 latest roast
+app.get('/api/roast/history', async (req, res) => {
+  console.log("Getting logs...");
+  // use params to get page and limit
+  const currentPage = parseInt(req.query.page) || 0;
+  const limit = parseInt(req.query.limit) || 5;
+
+  // get logs with pagination
+  const logs = await getLogs({}, currentPage, limit);
+  const totalItems = await getLogCount({});
+  const totalPage = Math.ceil(totalItems / limit);
+
+  // only get specific fields
+  const items = logs.map(log => {
+    return {
+      username: log.username,
+      lang: log.lang,
+      result: log.result,
+      createdAt: log.createdAt.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })
+    }
+  });
+
+  // Create data object
+  const data = {
+    items,
+    totalItems,
+    currentPage,
+    totalPage
+  }
+
+  res.json({ data });
 });
 
 app.listen(port, () => {

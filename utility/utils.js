@@ -6,6 +6,11 @@ function parseUserAgent(userAgent) {
     return parser.setUA(userAgent).getResult();
 }
 
+// date format dd-mm-yyyy hh:mm:ss
+function formatDate(date) {
+    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
 module.exports = {
     parseUserAgent
 };
