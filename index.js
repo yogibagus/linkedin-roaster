@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
 });
 
 // Queue endpoint
-app.post('/api/roast/queue', async (req, res) => {
+app.post('/api/roast/queue', limiter, async (req, res) => {
   const { username, lang } = req.body;
 
   if (!lang) {
