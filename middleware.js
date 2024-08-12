@@ -1,12 +1,12 @@
 const rateLimit = require('express-rate-limit');
 
 const limiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 4, // limit each IP to 4 requests per windowMs
+  windowMs: 60 * 60 * 1000, // 1 hour window
+  max: 2, // limit each IP to 2 requests per windowMs
   skipSuccessfulRequests: false,
   message: {
-    error: 'Too many requests from this IP. Please try again later.',
-    message: 'Limit is 4 requests per 10 minutes',
+    error: 'Too many requests from this IP. Please try again after an hour',
+    message: 'Limit is 2 requests per hour',
     code: 429,
   },
   keyGenerator: function (req) {

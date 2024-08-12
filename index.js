@@ -46,7 +46,7 @@ app.post('/api/roast/linkedin', limiter, async (req, res) => {
     res.json({ response });
   } catch (error) {
     console.error('Error during scraping:', error);
-    res.status(500).json({ error: 'Failed to process request' });
+    res.status(500).json({ error: 'We’re currently experiencing high traffic on our servers' });
   }
 });
 
