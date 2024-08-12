@@ -17,7 +17,7 @@ app.use(requestIp.mw())
 app.use(cors())
 
 app.get('/', (req, res) => {
-  res.send('Welcome to Roast API!');
+  res.send('Welcome to LinkedIn Roast API');
 });
 
 // Queue endpoint
@@ -56,6 +56,8 @@ const worker = async () => {
     const profileUrl = "https://www.linkedin.com/in/" + username;
 
     try {
+      // delay for 3 or 5 seconds to prevent ban from linkedin
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 3000));
       const data = await getProfileLinkedIn(profileUrl);
       if (!data) {
         throw new Error('Profile not found');
@@ -69,16 +71,15 @@ const worker = async () => {
 
     } catch (error) {
       console.error('Error processing job:', error);
-      // Implementasi retry logic atau error handling lain
       throw error;
     }
   });
 };
 
-// Jalankan worker
+// Start worker
 worker();
 
-// Endpoint untuk mengecek status job
+// Endpoint for checking job status
 app.get('/api/roast/queue/:jobId', async (req, res) => {
   const { jobId } = req.params;
   try {
