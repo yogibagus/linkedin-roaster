@@ -4,9 +4,16 @@
 const { DbModel } = require('../db/database');
 
 // Create log
-async function createLog(username, user_agent, scrape_data, prompt, lang, platform, result, ip) {
-    const log = new DbModel({ username, user_agent, scrape_data, prompt, lang, platform, result, ip });
+async function createLog(job_id, username, scrape_data, prompt, lang, platform, result) {
+    const log = new DbModel({ job_id, username, scrape_data, prompt, lang, platform, result });
     await log.save();
+}
+
+// get log by job_id
+async function getLogByJobId(job_id) {
+    const log = await
+        DbModel.findOne({ job_id });
+    return log;
 }
 
 // get log with filter and pagination
@@ -28,5 +35,6 @@ async function getLogCount(filter) {
 module.exports = {
     createLog,
     getLogs,
-    getLogCount
+    getLogCount,
+    getLogByJobId
 };

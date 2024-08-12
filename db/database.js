@@ -10,14 +10,13 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 
 // Model Mongoose
 const DataSchema = new mongoose.Schema({
+  job_id: { type: String, required: true },
   username: { type: String, required: true },
-  user_agent: { type: Object, required: true },
   scrape_data: { type: Object, required: true },
   prompt: { type: String, required: true },
   lang: { type: String, required: true },
   platform: { type: String, required: true },
   result: { type: String, required: true },
-  ip: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
 });
 

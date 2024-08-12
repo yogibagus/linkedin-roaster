@@ -57,7 +57,7 @@ async function generateText(prompt) {
 }
 
 // Function to generate a roast based on the profile information
-async function generateRoast(req, profileInfo, lang, platform) {
+async function generateRoast(jobId, profileInfo, lang, platform) {
     console.log('Generating text roast ...');
     try {
         // Construct the prompt for the generative model
@@ -81,7 +81,7 @@ async function generateRoast(req, profileInfo, lang, platform) {
         result = await generateText(prompt);
 
         // Log the generated roast
-        await createLog(profileInfo.publicIdentifier, parseUserAgent(req.headers['user-agent']), profileInfo, prompt, lang, platform, result, req.clientIp);
+        await createLog(jobId, profileInfo.publicIdentifier, profileInfo, prompt, lang, platform, result);
         
         console.log("Roasting result:", result)
         return result;

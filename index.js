@@ -3,7 +3,8 @@ const { limiter } = require('./middleware');
 const { getProfileLinkedIn } = require('./utility/scraper');
 const { generateRoast } = require('./utility/gemini-ai');
 const requestIp = require('request-ip');
-const { getLogs, getLogCount } = require('./utility/logging');
+const { getLogs, getLogCount, getLogByJobId } = require('./utility/logging');
+const { roastQueue } = require('./db/redis');
 var cors = require('cors')
 require('dotenv').config()
 
@@ -18,6 +19,102 @@ app.use(cors())
 app.get('/', (req, res) => {
   res.send('Welcome to Roast API!');
 });
+
+// Queue endpoint
+app.post('/api/roast/queue', async (req, res) => {
+  const { username, lang } = req.body;
+
+  if (!lang) {
+    return res.status(400).json({ error: 'Language is required' });
+  }
+
+  if (!username) {
+    return res.status(400).json({ error: 'Profile URL is required' });
+  }
+
+  try {
+    // Add job to queue
+    const job = await roastQueue.add({ username, lang });
+
+    // Send response with job id
+    res.status(202).json({
+      message: 'Request added to queue',
+      jobId: job.id
+    });
+
+  } catch (error) {
+    console.error('Error adding job to queue:', error);
+    res.status(500).json({ error: 'Failed to add job to queue' });
+  }
+});
+
+
+// Worker function
+const worker = async () => {
+  roastQueue.process(async (job) => {
+    const { username, lang } = job.data;
+    const profileUrl = "https://www.linkedin.com/in/" + username;
+
+    try {
+      const data = await getProfileLinkedIn(profileUrl);
+      if (!data) {
+        throw new Error('Profile not found');
+      }
+
+      const result = await generateRoast(job.id, data, lang, 'linkedin');
+
+      console.log('Job id:', job.id, 'sucessfully processed');
+    
+      return result;
+
+    } catch (error) {
+      console.error('Error processing job:', error);
+      // Implementasi retry logic atau error handling lain
+      throw error;
+    }
+  });
+};
+
+// Jalankan worker
+worker();
+
+// Endpoint untuk mengecek status job
+app.get('/api/roast/queue/:jobId', async (req, res) => {
+  const { jobId } = req.params;
+  try {
+    const job = await roastQueue.getJob(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: 'Job tidak ditemukan' });
+    }
+
+    // Ambil status job, jika sukses ambil data di database
+    const jobStatus = await job.getState();
+    if (jobStatus === 'completed') {
+      const log = await getLogByJobId(jobId);
+      // pick only specific fields
+      response = {
+        username: log.username,
+        lang: log.lang,
+        result : log.result,
+        createdAt: log.createdAt.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }) 
+      }
+      return res.json({ status: jobStatus, response });
+    }else if (jobStatus === 'waiting' || jobStatus === 'active') {
+      // return pendig count
+      const waitingCount = await roastQueue.getWaitingCount();
+      return res.json({ status: jobStatus, waitingCount });
+    }
+
+    res.json({ status: jobStatus });
+  } catch (error) {
+    console.error('Error fetching job status:', error);
+    res.status(500).json({ error: 'Gagal mengambil status job' });
+  }
+});
+
+
+// =========== OLD CODE ===========
 
 // LinkedIn profile scraping endpoint
 app.post('/api/roast/linkedin', limiter, async (req, res) => {
