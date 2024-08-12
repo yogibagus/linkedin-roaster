@@ -5,7 +5,7 @@ const limiter = rateLimit({
   max: 2, // limit each IP to 2 requests per windowMs
   skipSuccessfulRequests: false,
   message: {
-    error: 'Too many requests from this IP. Please try again after an hour',
+    error: 'Your request limit is exceeded! Please wait for an hour.',
     message: 'Limit is 2 requests per hour',
     code: 429,
   },
