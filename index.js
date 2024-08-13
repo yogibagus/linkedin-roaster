@@ -25,10 +25,10 @@ app.get('/', (req, res) => {
 function validateUsername(username) {
   // Regular expression to match a general URL pattern
   const urlPattern = /^(https?:\/\/)?([a-z\d-]+)\.([a-z\d.-]+)([\/\w.-]*)*\/?$/i;
-  
+
   // Regular expression to match only alphabets and dashes
   const validUsernamePattern = /^[a-z-]+$/i;
-  
+
   // Check if the username matches the URL pattern
   if (urlPattern.test(username)) {
     return res.status(400).json({ error: 'Please provide a valid username that is not a URL' });
@@ -82,8 +82,8 @@ const worker = async () => {
     const profileUrl = "https://www.linkedin.com/in/" + username;
 
     try {
-      // delay for 3 or 5 seconds to prevent ban from linkedin
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 3000));
+      // Delay for 5 to 10 seconds to prevent ban from LinkedIn
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 5000));
       const data = await getProfileLinkedIn(profileUrl);
       if (!data) {
         throw new Error('Profile not found');
