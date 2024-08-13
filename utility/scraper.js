@@ -66,7 +66,7 @@ async function getProfileLinkedIn(profileUrl) {
     await getCookie();
 
     // using cookie
-    console.log('Using cookie:', selectedCookie.cookie);
+    console.log('Using cookie id:', selectedCookie._id);
     try {
         // Fetch the LinkedIn profile page
         const { data } = await axios.get(profileUrl, {
