@@ -22,21 +22,27 @@ app.get('/', (req, res) => {
 
 
 // Function to validate username
-function validateUsername(res, username) {
+function validateUsername(username) {
   // Regular expression to match a general URL pattern
   const urlPattern = /^(https?:\/\/)?([a-z\d-]+)\.([a-z\d.-]+)([\/\w.-]*)*\/?$/i;
 
   // Regular expression to match only alphabets and dashes
-  const validUsernamePattern = /^[a-z-]+$/i;
+  const validUsernamePattern = /^[a-z0-9-]+$/i;
 
   // Check if the username matches the URL pattern
   if (urlPattern.test(username)) {
-    return res.status(400).json({ error: 'Please provide a valid username that is not a URL' });
+    return { 
+      status: "error",
+      error: 'Please provide a valid username that is not a URL'
+    }
   }
 
   // Check if the username contains only alphabets and dashes
   if (!validUsernamePattern.test(username)) {
-    return res.status(400).json({ error: 'Username can only contain alphabets and dashes' });
+    return { 
+      status: "error",
+      error: 'Username can only contain alphabets and dashes'
+    }
   }
 
   // If all checks pass
@@ -56,7 +62,10 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
     return res.status(400).json({ error: 'Profile URL is required' });
   }
 
-  validateUsername(res, username);
+  const checkUsername = validateUsername(username);
+  if (checkUsername.error){
+    return res.status(400).json({ error: checkUsername.error });
+  }
 
   try {
     // Add job to queue
