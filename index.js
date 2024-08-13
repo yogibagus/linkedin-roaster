@@ -20,6 +20,30 @@ app.get('/', (req, res) => {
   res.send('Welcome to LinkedIn Roast API');
 });
 
+
+// Function to validate username
+function validateUsername(username) {
+  // Regular expression to match a general URL pattern
+  const urlPattern = /^(https?:\/\/)?([a-z\d-]+)\.([a-z\d.-]+)([\/\w.-]*)*\/?$/i;
+  
+  // Regular expression to match only alphabets and dashes
+  const validUsernamePattern = /^[a-z-]+$/i;
+  
+  // Check if the username matches the URL pattern
+  if (urlPattern.test(username)) {
+    return res.status(400).json({ error: 'Please provide a valid username that is not a URL' });
+  }
+
+  // Check if the username contains only alphabets and dashes
+  if (!validUsernamePattern.test(username)) {
+    return res.status(400).json({ error: 'Username can only contain alphabets and dashes' });
+  }
+
+  // If all checks pass
+  return true;
+}
+
+
 // Queue endpoint
 app.post('/api/roast/queue', limiter, async (req, res) => {
   const { username, lang } = req.body;
@@ -32,11 +56,7 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
     return res.status(400).json({ error: 'Profile URL is required' });
   }
 
-  // Regular expression to match a general URL pattern
-  const urlPattern = /^(https?:\/\/)?([a-z\d-]+)\.([a-z\d.-]+)([\/\w.-]*)*\/?$/i;
-  if (urlPattern.test(username)) {
-    return res.status(400).json({ error: 'Please provide a valid username' });
-  }
+  validateUsername(username);
 
   try {
     // Add job to queue
