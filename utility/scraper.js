@@ -66,8 +66,8 @@ async function getProfileLinkedIn(profileUrl) {
         const extractedData = extractorData(jsonData, extractUsername(profileUrl));
         return extractedData;
     } catch (error) {
-        console.error('Error fetching/parsing LinkedIn data:', error);
-        throw error;
+        // console.error('Error fetching/parsing LinkedIn data:', error);
+        throw error.message;
     }
 }
 

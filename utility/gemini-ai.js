@@ -86,8 +86,8 @@ async function generateRoast(jobId, profileInfo, lang, platform) {
         console.log("Roasting result:", result)
         return result;
     } catch (error) {
-        console.error('Error generating roast:', error);
-        throw error;
+        // console.error('Error generating roast:', error);
+        throw error.message;
     }
 }
 

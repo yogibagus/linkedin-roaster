@@ -67,6 +67,9 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
     return res.status(400).json({ error: checkUsername.error });
   }
 
+  // log request
+  console.log('Incoming request:', { username, lang, ip: req.clientIp });
+
   try {
     // Add job to queue
     const job = await roastQueue.add({ username, lang });
@@ -91,6 +94,7 @@ const worker = async () => {
     const profileUrl = "https://www.linkedin.com/in/" + username;
 
     try {
+      console.log('Start processing job:', job.id);
       // Delay for 5 to 10 seconds to prevent ban from LinkedIn
       await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 5000));
       const data = await getProfileLinkedIn(profileUrl);
@@ -100,13 +104,13 @@ const worker = async () => {
 
       const result = await generateRoast(job.id, data, lang, 'linkedin');
 
-      console.log('Job id:', job.id, 'sucessfully processed');
+      console.log('Job completed:', job.id);
 
       return result;
 
     } catch (error) {
       console.error('Error processing job:', error);
-      throw error;
+      throw new Error(error);
     }
   });
 };
@@ -140,9 +144,9 @@ app.get('/api/roast/queue/:jobId', async (req, res) => {
       // return pendig count
       const waitingCount = await roastQueue.getWaitingCount();
       return res.json({ status: jobStatus, waitingCount });
+    }else if (jobStatus === 'failed') {
+      return res.json({ status: jobStatus, error: job.failedReason });
     }
-
-    res.json({ status: jobStatus });
   } catch (error) {
     console.error('Error fetching job status:', error);
     res.status(500).json({ error: 'Gagal mengambil status job' });
