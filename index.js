@@ -32,6 +32,12 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
     return res.status(400).json({ error: 'Profile URL is required' });
   }
 
+  // Regular expression to match a general URL pattern
+  const urlPattern = /^(https?:\/\/)?([a-z\d-]+)\.([a-z\d.-]+)([\/\w.-]*)*\/?$/i;
+  if (urlPattern.test(username)) {
+    return res.status(400).json({ error: 'Please provide a valid username' });
+  }
+
   try {
     // Add job to queue
     const job = await roastQueue.add({ username, lang });
@@ -66,7 +72,7 @@ const worker = async () => {
       const result = await generateRoast(job.id, data, lang, 'linkedin');
 
       console.log('Job id:', job.id, 'sucessfully processed');
-    
+
       return result;
 
     } catch (error) {
@@ -97,11 +103,11 @@ app.get('/api/roast/queue/:jobId', async (req, res) => {
       response = {
         username: log.username,
         lang: log.lang,
-        result : log.result,
-        createdAt: log.createdAt.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' }) 
+        result: log.result,
+        createdAt: log.createdAt.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })
       }
       return res.json({ status: jobStatus, response });
-    }else if (jobStatus === 'waiting' || jobStatus === 'active') {
+    } else if (jobStatus === 'waiting' || jobStatus === 'active') {
       // return pendig count
       const waitingCount = await roastQueue.getWaitingCount();
       return res.json({ status: jobStatus, waitingCount });
