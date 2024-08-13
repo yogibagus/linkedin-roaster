@@ -1,6 +1,7 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
+const { DbCookieListModel } = require('../db/database');
 require('dotenv').config()
 
 // LinkedIn li_at cookie - replace with your actual value (required for scraping)
@@ -21,7 +22,7 @@ var headers = {
     "X-Li-Page-Instance": "urn:li:page:d_flagship3_profile_view_base;vjTMYdRWTe+rXl9E7H2hQw==",
     "X-Li-Track": '{"clientVersion":"1.13.21486","mpVersion":"1.13.21486","osName":"web","timezoneOffset":7,"timezone":"Asia/Jakarta","deviceFormFactor":"DESKTOP","mpName":"voyager-web","displayDensity":2,"displayWidth":2894,"displayHeight":924}',
     "X-Restli-Protocol-Version": "2.0.0",
-    'Cookie': `li_at=${liAtCookie}`,
+    // 'Cookie': `li_at=${liAtCookie}`,
     "Referrer-Policy": "strict-origin-when-cross-origin"
   }
 
@@ -30,14 +31,49 @@ function extractUsername(profileUrl) {
     return profileUrl.split("/").pop();
 }
 
-// utility.js
+// global variable, selected cookie
+let selectedCookie = [];
+
+// Function to get cookie but not same with the previous cookie
+async function getCookie() {
+    // get all cookie
+    const allCookie = await DbCookieListModel.find();
+    // check if selectedCookie is empty
+    if (selectedCookie.length === 0) {
+        // select random cookie
+        selectedCookie = allCookie[Math.floor(Math.random() * allCookie.length)];
+    } else {
+        // select random cookie
+        let tempCookie = allCookie[Math.floor(Math.random() * allCookie.length)];
+        // check if the selected cookie is the same with the previous cookie
+        if (selectedCookie.cookie === tempCookie.cookie) {
+            // select random cookie again
+            selectedCookie = allCookie[Math.floor(Math.random() * allCookie.length)];
+        } else {
+            // select the new cookie
+            selectedCookie = tempCookie;
+        }
+    }
+    // return the selected cookie
+    return selectedCookie;
+}
+
+
 // Function to fetch LinkedIn profile data
 async function getProfileLinkedIn(profileUrl) {
     console.log('Fetching LinkedIn profile data...');
+    // get the cookie
+    await getCookie();
+
+    // using cookie
+    console.log('Using cookie:', selectedCookie.cookie);
     try {
         // Fetch the LinkedIn profile page
         const { data } = await axios.get(profileUrl, {
-            headers: headers
+            headers: {
+                ...headers,
+                'Cookie': `li_at=${selectedCookie.cookie}` 
+            }
         });
         const $ = cheerio.load(data);
 
