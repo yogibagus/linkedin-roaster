@@ -104,7 +104,7 @@ const worker = async () => {
 
       const result = await generateRoast(job.id, data, lang, 'linkedin');
 
-      console.log('Job completed:', job.id);
+      console.log('Job completed:', job.id, 'Queue job waiting:', await roastQueue.getWaitingCount())
 
       return result;
 
