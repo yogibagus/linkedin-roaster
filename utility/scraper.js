@@ -34,27 +34,16 @@ function extractUsername(profileUrl) {
 // global variable, selected cookie
 let selectedCookie = [];
 
-// Function to get cookie but not same with the previous cookie
+// Select in order the cookie from the database
 async function getCookie() {
-    // get all cookie
-    const allCookie = await DbCookieListModel.find();
-    // check if selectedCookie is empty
-    if (selectedCookie.length === 0) {
-        // select random cookie
-        selectedCookie = allCookie[Math.floor(Math.random() * allCookie.length)];
+    if (selectedCookie.length == 0) {
+        selectedCookie = await DbCookieListModel.findOne().sort({ order: 1 });
     } else {
-        // select random cookie
-        let tempCookie = allCookie[Math.floor(Math.random() * allCookie.length)];
-        // check if the selected cookie is the same with the previous cookie
-        if (selectedCookie.cookie === tempCookie.cookie) {
-            // select random cookie again
-            selectedCookie = allCookie[Math.floor(Math.random() * allCookie.length)];
-        } else {
-            // select the new cookie
-            selectedCookie = tempCookie;
+        selectedCookie = await DbCookieListModel.findOne({ order: selectedCookie.order + 1 });
+        if (!selectedCookie) {
+            selectedCookie = await DbCookieListModel.findOne().sort({ order: 1 });
         }
     }
-    // return the selected cookie
     return selectedCookie;
 }
 
@@ -66,7 +55,7 @@ async function getProfileLinkedIn(profileUrl) {
     await getCookie();
 
     // using cookie
-    console.log('Using cookie id:', selectedCookie._id);
+    console.log('Using cookie order:', selectedCookie.order);
     try {
         // Fetch the LinkedIn profile page
         const { data } = await axios.get(profileUrl, {
@@ -134,5 +123,6 @@ function extractorData(jsonData, username) {
 
 module.exports = {
     getProfileLinkedIn,
-    extractorData
+    extractorData,
+    getCookie
 };
