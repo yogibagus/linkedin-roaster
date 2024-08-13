@@ -6,6 +6,25 @@ require('dotenv').config()
 // LinkedIn li_at cookie - replace with your actual value (required for scraping)
 const liAtCookie = process.env.LI_AT_COOKIE;
 
+var headers = {
+    "Accept-Language": "en-US,en;q=0.9,id;q=0.8",
+    "Priority": "u=1, i",
+    "Sec-Ch-Ua": '"Not)A;Brand";v="99", "Brave";v="127", "Chromium";v="127"',
+    "Sec-Ch-Ua-Mobile": "?0",
+    "Sec-Ch-Ua-Platform": "macOS",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Gpc": "1",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+    "X-Li-Lang": "en_US",
+    "X-Li-Page-Instance": "urn:li:page:d_flagship3_profile_view_base;vjTMYdRWTe+rXl9E7H2hQw==",
+    "X-Li-Track": '{"clientVersion":"1.13.21486","mpVersion":"1.13.21486","osName":"web","timezoneOffset":7,"timezone":"Asia/Jakarta","deviceFormFactor":"DESKTOP","mpName":"voyager-web","displayDensity":2,"displayWidth":2894,"displayHeight":924}',
+    "X-Restli-Protocol-Version": "2.0.0",
+    'Cookie': `li_at=${liAtCookie}`,
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  }
+
 // username splitter
 function extractUsername(profileUrl) {
     return profileUrl.split("/").pop();
@@ -18,10 +37,7 @@ async function getProfileLinkedIn(profileUrl) {
     try {
         // Fetch the LinkedIn profile page
         const { data } = await axios.get(profileUrl, {
-            headers: {
-                'Cookie': `li_at=${liAtCookie}`,
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
-            }
+            headers: headers
         });
         const $ = cheerio.load(data);
 
