@@ -1,6 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
-const fs = require('fs');
+// const fs = require('fs');
 const { DbCookieListModel } = require('../db/database');
 require('dotenv').config()
 
@@ -91,12 +91,12 @@ async function getProfileLinkedIn(profileUrl) {
         const jsonData = JSON.parse(lastCodeElement.text());
 
         // Write the parsed data to a JSON file
-        fs.writeFile('parsedData.json', JSON.stringify(jsonData, null, 2), (err) => {
-            if (err) {
-                console.error('Error writing to file:', err);
-                return res.status(500).json({ error: 'Error writing to file' });
-            }
-        });
+        // fs.writeFile('parsedData.json', JSON.stringify(jsonData, null, 2), (err) => {
+        //     if (err) {
+        //         console.error('Error writing to file:', err);
+        //         return res.status(500).json({ error: 'Error writing to file' });
+        //     }
+        // });
 
         // Extract the relevant profile information
         const extractedData = extractorData(jsonData, extractUsername(profileUrl));
