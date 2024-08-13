@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 
 
 // Function to validate username
-function validateUsername(username) {
+function validateUsername(res, username) {
   // Regular expression to match a general URL pattern
   const urlPattern = /^(https?:\/\/)?([a-z\d-]+)\.([a-z\d.-]+)([\/\w.-]*)*\/?$/i;
 
@@ -56,7 +56,7 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
     return res.status(400).json({ error: 'Profile URL is required' });
   }
 
-  validateUsername(username);
+  validateUsername(res, username);
 
   try {
     // Add job to queue
