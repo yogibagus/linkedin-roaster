@@ -46,10 +46,25 @@ const headers = {
 
 // function to extract fsd_profile id
 function getFsdProfileId(data) {
-    const elements = data.data.data.identityDashProfilesByMemberIdentity;
-    const fsdProfile = elements['*elements'][0];
-    const fsdProfileId = fsdProfile.split(':')[3];
-    return fsdProfileId;
+    try {
+        const elements = data.data.data.identityDashProfilesByMemberIdentity;
+
+        // Check if elements exists and has at least one element
+        if (elements && elements['*elements'] && elements['*elements'].length > 0) {
+            const fsdProfile = elements['*elements'][0];
+            const fsdProfileId = fsdProfile.split(':')[3];
+            return fsdProfileId;
+        } else {
+            // Handle the case where elements is empty or undefined
+            console.warn("No FSD profile found. 'elements' is empty or undefined.");
+            return null; // Or return an appropriate default value
+        }
+
+    } catch (error) {
+        // Handle any errors that occur during the process
+        console.error("Error getting FSD Profile ID:", error);
+        return null; // Or throw the error for higher-level handling
+    }
 }
 
 // Function to hit request to LinkedIn API
@@ -68,14 +83,13 @@ async function getLinkedInData(username) {
             url: apiUrl,
             headers: headers,
             maxBodyLength: Infinity,
-           
         };
 
         const { data } = await axios(config);
 
         // create json file name 
-        const fileName = 'linkedin-profile.json';
-        fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
+        // const fileName = 'linkedin-profile.json';
+        // fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
 
         // extract profile data
         let profileData = {};
@@ -93,6 +107,11 @@ async function getLinkedInData(username) {
         }
 
         profileData.fsdProfileId = getFsdProfileId(data);
+        // check if fsdProfileId is null
+        if (!profileData.fsdProfileId) {
+            return null;
+        }
+
         var expData = await getExperienceData(profileData.fsdProfileId);
         profileData.experience = expData;
 
@@ -106,34 +125,34 @@ async function getLinkedInData(username) {
 
 function extractComponentData(obj) {
     const data = [];
-  
+
     function traverse(obj) {
-      if (typeof obj !== 'object' || obj === null) {
-        return;
-      }
-  
-      for (const key in obj) {
-        // Extract entityComponent data
-        if (key === 'entityComponent' && obj[key]) { 
-          data.push({
-            title: obj[key]?.titleV2?.text?.text || null, // Provide default value if not exist
-            subtitle: obj[key]?.subtitle?.text || null 
-          });
-        } 
-        // Extract textComponent data
-        else if (key === 'textComponent' && obj[key]) {
-          data.push({
-            text: obj[key]?.text?.text || null // Provide default value if not exist
-          });
-        } else {
-          traverse(obj[key]);
+        if (typeof obj !== 'object' || obj === null) {
+            return;
         }
-      }
+
+        for (const key in obj) {
+            // Extract entityComponent data
+            if (key === 'entityComponent' && obj[key]) {
+                data.push({
+                    title: obj[key]?.titleV2?.text?.text || null, // Provide default value if not exist
+                    subtitle: obj[key]?.subtitle?.text || null
+                });
+            }
+            // Extract textComponent data
+            else if (key === 'textComponent' && obj[key]) {
+                data.push({
+                    text: obj[key]?.text?.text || null // Provide default value if not exist
+                });
+            } else {
+                traverse(obj[key]);
+            }
+        }
     }
-  
+
     traverse(obj);
     return data;
-  }
+}
 
 // fumction to get experience data
 async function getExperienceData(fsdProfileId) {
