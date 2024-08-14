@@ -24,6 +24,7 @@ const DataSchema = new mongoose.Schema({
 // Model schema for cookie list
 const CookieListSchema = new mongoose.Schema({
   cookie: { type: String, required: true },
+  crsf: { type: String, required: true },
   order: { type: Number, required: true },
 });
 

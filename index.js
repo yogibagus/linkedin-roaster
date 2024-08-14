@@ -5,6 +5,7 @@ const { generateRoast } = require('./utility/gemini-ai');
 const requestIp = require('request-ip');
 const { getLogs, getLogCount, getLogByJobId } = require('./utility/logging');
 const { roastQueue } = require('./db/redis');
+const { getLinkedInData } = require('./utility/newscraper');
 var cors = require('cors')
 require('dotenv').config()
 
@@ -91,13 +92,11 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
 const worker = async () => {
   roastQueue.process(async (job) => {
     const { username, lang } = job.data;
-    const profileUrl = "https://www.linkedin.com/in/" + username;
-
     try {
       console.log('Start processing job:', job.id);
       // Delay for 5 to 10 seconds to prevent ban from LinkedIn
       await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 5000));
-      const data = await getProfileLinkedIn(profileUrl);
+      const data = await getLinkedInData(username);
       if (!data) {
         throw new Error('Profile not found');
       }

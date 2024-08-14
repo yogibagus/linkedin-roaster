@@ -71,9 +71,9 @@ async function generateRoast(jobId, profileInfo, lang, platform) {
             return "Platform is not valid";
         }
 
-        const prompt = `Roasting this ${platform} profile in ${lang} within 100 words with this data: ${JSON.stringify(
+        const prompt = `Roasting this ${platform} profile especially in the job experience section in ${lang} with this data: ${JSON.stringify(
             profileInfo
-        )} and use slang according to language`;
+        )}, use slang according to language, talk about the company, job, and experience and maximal 100 words.`;
 
         console.log('Prompt:', prompt);
         console.log("Lang:", lang);
