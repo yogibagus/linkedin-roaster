@@ -133,16 +133,16 @@ function extractComponentData(obj) {
 
         for (const key in obj) {
             // Extract entityComponent data
-            if (key === 'entityComponent' && obj[key]) {
+            if (key === 'entityComponent' && obj[key]?.titleV2?.text?.text) {
                 data.push({
-                    title: obj[key]?.titleV2?.text?.text || null, // Provide default value if not exist
-                    subtitle: obj[key]?.subtitle?.text || null
+                    title: obj[key].titleV2.text.text,
+                    subtitle: obj[key]?.subtitle?.text
                 });
             }
             // Extract textComponent data
-            else if (key === 'textComponent' && obj[key]) {
+            else if (key === 'textComponent' && obj[key]?.text?.text) {
                 data.push({
-                    text: obj[key]?.text?.text || null // Provide default value if not exist
+                    text: obj[key].text.text
                 });
             } else {
                 traverse(obj[key]);
