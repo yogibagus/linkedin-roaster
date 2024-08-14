@@ -18,9 +18,7 @@ async function getCookie() {
             selectedCookie = await DbCookieListModel.findOne().sort({ order: 1 });
         }
     }
-
     console.log("Selected crsftoken:", selectedCookie.crsf);
-
     return selectedCookie;
 }
 
@@ -62,8 +60,7 @@ async function getLinkedInData(username) {
             headers.cookie = selectedCookie.cookie;
             headers['csrf-token'] = selectedCookie.crsf;
         });
-        console.log("Selected crsftoken:", selectedCookie.crsf);
-        // console.log("Headers:", headers);
+
         const apiUrl = `https://www.linkedin.com/voyager/api/graphql?includeWebMetadata=true&variables=(vanityName:${username})&queryId=voyagerIdentityDashProfiles.4d9e161cdf3cf64b1c9a7a7c1fc94cff`
 
         let config = {
@@ -96,21 +93,14 @@ async function getLinkedInData(username) {
         }
 
         profileData.fsdProfileId = getFsdProfileId(data);
-
-        // console.log('LinkedIn profile data:', profileData);
-
-        // hit request to get experience data
         var expData = await getExperienceData(profileData.fsdProfileId);
-
         profileData.experience = expData;
-
-        // console.log('Experience data:', expData);
 
         return profileData;
 
     } catch (error) {
         // console.error('Error hitting LinkedIn API:', error);
-        throw error;
+        throw error.message;
     }
 }
 
@@ -158,23 +148,12 @@ async function getExperienceData(fsdProfileId) {
         };
 
         const { data } = await axios(config);
-
-        // create experienceData json file name
-        // const rawData = 'raw_linkedin-experience.json';
-        // fs.writeFileSync(rawData, JSON.stringify(data, null, 2));
-
-        // extract experience data
         const experienceData = extractComponentData(data);
-
-        // create experienceData json file name
-        // const fileName = 'linkedin-experience.json';
-        // fs.writeFileSync(fileName, JSON.stringify(experienceData, null, 2));
-
         return experienceData;
 
     } catch (error) {
         // console.error('Error hitting LinkedIn API:', error);
-        throw error;
+        throw error.message;
     }
 }
 
