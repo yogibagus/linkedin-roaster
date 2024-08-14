@@ -93,9 +93,10 @@ const worker = async () => {
   roastQueue.process(async (job) => {
     const { username, lang } = job.data;
     try {
-      console.log('Start processing job:', job.id);
       // Delay for 5 to 10 seconds to prevent ban from LinkedIn
       await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 5000));
+      console.log('Start processing job:', job.id);
+      
       const data = await getLinkedInData(username);
       if (!data) {
         throw new Error('Profile not found');
