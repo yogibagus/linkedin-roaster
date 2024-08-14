@@ -18,7 +18,7 @@ async function getCookie() {
             selectedCookie = await DbCookieListModel.findOne().sort({ order: 1 });
         }
     }
-    console.log("Selected crsftoken:", selectedCookie.crsf);
+    console.log("Selected order id:", selectedCookie.order);
     return selectedCookie;
 }
 
