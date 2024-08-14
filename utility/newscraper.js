@@ -99,8 +99,8 @@ async function getLinkedInData(username) {
         return profileData;
 
     } catch (error) {
-        // console.error('Error hitting LinkedIn API:', error);
-        throw error.message;
+        console.error('Error hitting LinkedIn API:', error.message);
+        throw "Max redirect limit reached";
     }
 }
 
@@ -152,8 +152,8 @@ async function getExperienceData(fsdProfileId) {
         return experienceData;
 
     } catch (error) {
-        // console.error('Error hitting LinkedIn API:', error);
-        throw error.message;
+        console.error('Error hitting LinkedIn API:', error.message);
+        throw "Max redirect limit reached";
     }
 }
 
