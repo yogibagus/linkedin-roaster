@@ -16,6 +16,7 @@ const DataSchema = new mongoose.Schema({
   scrape_data: { type: Object, required: true },
   prompt: { type: String, required: true },
   lang: { type: String, required: true },
+  type: { type: String, required: true },
   platform: { type: String, required: true },
   result: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }

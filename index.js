@@ -1,11 +1,10 @@
 const express = require('express');
-const { limiter } = require('./middleware');
-const { getProfileLinkedIn } = require('./utility/scraper');
-const { generateRoast } = require('./utility/gemini-ai');
+const { limiterQueue, limiterAdvice } = require('./middleware');
+const { generateRoast } = require('./lib/gemini-ai');
 const requestIp = require('request-ip');
-const { getLogs, getLogCount, getLogByJobId } = require('./utility/logging');
-const { roastQueue } = require('./db/redis');
-const { getLinkedInData } = require('./utility/newscraper');
+const { getLogs, getLogCount, getLogByJobId } = require('./lib/logging');
+const { roastQueue, adviceQueue } = require('./db/redis');
+const { getLinkedInData } = require('./lib/newscraper');
 var cors = require('cors')
 require('dotenv').config()
 
@@ -32,7 +31,7 @@ function validateUsername(username) {
 
   // Check if the username matches the URL pattern
   if (urlPattern.test(username)) {
-    return { 
+    return {
       status: "error",
       error: 'Please provide a valid username that is not a URL'
     }
@@ -40,7 +39,7 @@ function validateUsername(username) {
 
   // Check if the username contains only alphabets and dashes
   if (!validUsernamePattern.test(username)) {
-    return { 
+    return {
       status: "error",
       error: 'Username can only contain alphabets and dashes'
     }
@@ -52,7 +51,7 @@ function validateUsername(username) {
 
 
 // Queue endpoint
-app.post('/api/roast/queue', limiter, async (req, res) => {
+app.post('/api/roast/queue', limiterQueue, async (req, res) => {
   const { username, lang } = req.body;
 
   if (!lang) {
@@ -64,7 +63,7 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
   }
 
   const checkUsername = validateUsername(username);
-  if (checkUsername.error){
+  if (checkUsername.error) {
     return res.status(400).json({ error: checkUsername.error });
   }
 
@@ -87,24 +86,48 @@ app.post('/api/roast/queue', limiter, async (req, res) => {
   }
 });
 
+// Queue advice endpoint
+app.post('/api/advice/queue', limiterAdvice, async (req, res) => {
+  const { jobId } = req.body;
+
+  if (!jobId) {
+    return res.status(400).json({ error: 'Job ID is required' });
+  }
+
+  try {
+    // Add job to queue
+    const job = await adviceQueue.add({ jobId });
+
+    // Send response with job id
+    res.status(202).json({
+      message: 'Request advice added to queue',
+      jobId: job.id
+    });
+
+  } catch (error) {
+    console.error('Error adding job to queue:', error);
+    res.status(500).json({ error: 'Failed to add job to queue' });
+  }
+});
+
 
 // Worker function
-const worker = async () => {
+const workerRoast = async () => {
   roastQueue.process(async (job) => {
     const { username, lang } = job.data;
     try {
       // Delay for 5 to 10 seconds to prevent ban from LinkedIn
       await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 5000));
       console.log('Start processing job:', job.id);
-      
+
       const data = await getLinkedInData(username);
       if (!data) {
         throw new Error('Profile not found');
       }
 
-      const result = await generateRoast(job.id, data, lang, 'linkedin');
+      const result = await generateRoast(job.id, data, lang, 'linkedin', 'roasting');
 
-      console.log('Job completed:', job.id, 'Queue job waiting:', await roastQueue.getWaitingCount())
+      console.log('Job completed:', job.id, ' Queue job waiting:', await roastQueue.getWaitingCount())
 
       return result;
 
@@ -115,8 +138,8 @@ const worker = async () => {
   });
 };
 
-// Start worker
-worker();
+// Start workerRoast
+workerRoast();
 
 // Endpoint for checking job status
 app.get('/api/roast/queue/:jobId', async (req, res) => {
@@ -144,7 +167,7 @@ app.get('/api/roast/queue/:jobId', async (req, res) => {
       // return pendig count
       const waitingCount = await roastQueue.getWaitingCount();
       return res.json({ status: jobStatus, waitingCount });
-    }else if (jobStatus === 'failed') {
+    } else if (jobStatus === 'failed') {
       return res.json({ status: jobStatus, error: job.failedReason });
     }
   } catch (error) {
@@ -153,39 +176,72 @@ app.get('/api/roast/queue/:jobId', async (req, res) => {
   }
 });
 
+// Worker function for advice
+const workerAdvice = async () => {
+  adviceQueue.process(async (job) => {
+    const { jobId } = job.data;
+    try {
+      console.log('Start processing advice job:', job.id);
 
-// =========== OLD CODE ===========
+      // Delay for 5 to 10 seconds to prevent ban from LinkedIn
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 5000));
 
-// LinkedIn profile scraping endpoint
-app.post('/api/roast/linkedin', limiter, async (req, res) => {
-  console.log("Starting scraping...");
-  const { username } = req.body;
-  const { lang } = req.body;
+      const log = await getLogByJobId(jobId);
+      if (!log) {
+        throw new Error('Log not found');
+      }
 
-  if (!lang) {
-    return res.status(400).json({ error: 'Language is required' });
-  }
+      const result = await generateRoast(job.id, log.scrape_data, log.lang, 'linkedin', 'advicing');
 
-  if (!username) {
-    return res.status(400).json({ error: 'Profile URL is required' });
-  }
+      console.log('Advice job completed:', job.id, ' Queue job waiting:', await adviceQueue.getWaitingCount())
 
-  const profileUrl = "https://www.linkedin.com/in/" + username;
+      return result;
 
+    } catch (error) {
+      console.error('Error processing advice job:', error);
+      throw new Error(error);
+    }
+  });
+};
+
+// Start workerAdvice
+workerAdvice();
+
+// Endpoint for get advice by job id
+app.get('/api/advice/queue/:jobId', async (req, res) => {
+  const { jobId } = req.params;
   try {
-    const data = await getProfileLinkedIn(profileUrl);
-    if (!data) {
-      return res.status(404).json({ error: 'We’re currently experiencing high traffic on our servers. This might be causing the profile not to be found or accessed. Please try again later. Thank you for your patience!' });
+    const job = await adviceQueue.getJob(jobId);
+
+    if (!job) {
+      return res.status(404).json({ error: 'Job not found' });
     }
 
-    const response = await generateRoast(req, data, lang, 'linkedin');
-
-    res.json({ response });
+    // Ambil status job, jika sukses ambil data di database
+    const jobStatus = await job.getState();
+    if (jobStatus === 'completed') {
+      const log = await getLogByJobId(jobId);
+      // pick only specific fields
+      response = {
+        username: log.username,
+        lang: log.lang,
+        result: log.result,
+        createdAt: log.createdAt.toLocaleString('en-US', { timeZone: 'Asia/Jakarta' })
+      }
+      return res.json({ status: jobStatus, response });
+    } else if (jobStatus === 'waiting' || jobStatus === 'active') {
+      // return pendig count
+      const waitingCount = await adviceQueue.getWaitingCount();
+      return res.json({ status: jobStatus, waitingCount });
+    } else if (jobStatus === 'failed') {
+      return res.json({ status: jobStatus, error: job.failedReason });
+    }
   } catch (error) {
-    console.error('Error during scraping:', error);
-    res.status(500).json({ error: 'We’re currently experiencing high traffic on our servers' });
+    console.error('Error fetching job status:', error);
+    res.status(500).json({ error: 'Failed to get job status' });
   }
-});
+}
+);
 
 // Api get 5 latest roast
 app.get('/api/roast/history', async (req, res) => {
