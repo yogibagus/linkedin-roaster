@@ -249,10 +249,20 @@ app.get('/api/roast/history', async (req, res) => {
   // use params to get page and limit
   const currentPage = parseInt(req.query.page) || 0;
   const limit = parseInt(req.query.limit) || 5;
+  const type = req.query.type || 'roasting';
+
+  // params validation
+  if (currentPage < 0 || limit < 1) {
+    return res.status(400).json({ error: 'Invalid page or limit' });
+  }
+
+  var params = {
+    type: type
+  }
 
   // get logs with pagination
   const logs = await getLogs({}, currentPage, limit);
-  const totalItems = await getLogCount({});
+  const totalItems = await getLogCount(params);
   const totalPage = Math.ceil(totalItems / limit);
 
   // only get specific fields
