@@ -154,7 +154,7 @@ app.get('/api/roast/queue/:jobId', async (req, res) => {
     // Ambil status job, jika sukses ambil data di database
     const jobStatus = await job.getState();
     if (jobStatus === 'completed') {
-      const log = await getLogByJobId(jobId);
+      const log = await getLogByJobId(jobId, 'roasting');
       // pick only specific fields
       response = {
         username: log.username,
@@ -186,7 +186,7 @@ const workerAdvice = async () => {
       // Delay for 5 to 10 seconds to prevent ban from LinkedIn
       await new Promise(resolve => setTimeout(resolve, Math.random() * 5000 + 5000));
 
-      const log = await getLogByJobId(jobId);
+      const log = await getLogByJobId(jobId, 'roasting');
       if (!log) {
         throw new Error('Log not found');
       }
@@ -220,7 +220,7 @@ app.get('/api/advice/queue/:jobId', async (req, res) => {
     // Ambil status job, jika sukses ambil data di database
     const jobStatus = await job.getState();
     if (jobStatus === 'completed') {
-      const log = await getLogByJobId(jobId);
+      const log = await getLogByJobId(jobId, 'advicing');
       // pick only specific fields
       response = {
         username: log.username,
