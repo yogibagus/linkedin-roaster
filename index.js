@@ -20,6 +20,10 @@ app.get('/', (req, res) => {
   res.send('Welcome to LinkedIn Roast API');
 });
 
+app.get('/api', (req, res) => {
+  return res.json({ message: 'Welcome to LinkedIn Roast API' });
+});
+
 
 // Function to validate username
 function validateUsername(username) {
