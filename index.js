@@ -10,11 +10,21 @@ require('dotenv').config()
 
 // add port
 const port = process.env.PORT || 3000;
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
 const app = express();
 app.use(express.json());
 app.use(requestIp.mw())
-app.use(cors())
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (allowedOrigins.includes(origin) || !origin) { 
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+};
+app.use(cors(corsOptions));
 
 app.get('/', (req, res) => {
   res.send('Welcome to LinkedIn Roast API');
